@@ -10,7 +10,7 @@ dotenv.config({ path: path.join(__dirname, "config/config.env") });
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://eternicabeauty.com",
+  "https://www.nexprint.ae",
 ];
 
 app.use(
