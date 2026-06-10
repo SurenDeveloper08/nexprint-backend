@@ -1,117 +1,89 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const errorMiddleware = require('./middlewares/error');
-const cookieParser = require('cookie-parser')
-const path = require('path')
-const dotenv = require('dotenv');
-const cors = require('cors');
+const path = require("path");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
-dotenv.config({ path: path.join(__dirname, "config/config.env") });
+const errorMiddleware = require("./middlewares/error");
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://www.nexprint.ae",
-];
+dotenv.config({
+  path: path.join(__dirname, "config/config.env"),
+});
 
+// CORS
 app.use(
   cors({
-    origin: function (origin, callback) {
-
-      // allow requests with no origin
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (
-        allowedOrigins.includes(origin)
-      ) {
-
-        callback(null, true);
-
-      } else {
-
-        callback(
-          new Error(
-            "Not allowed by CORS"
-          )
-        );
-
-      }
-
-    },
-
+    origin: [
+      "http://localhost:3000",
+      "https://www.nexprint.ae",
+      "https://nexprint.ae",
+    ],
     credentials: true,
-
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Also needed:
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
-app.use(require('cookie-parser')());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
-app.set('trust proxy', true);
-const products = require('./routes/product')
-const auth = require('./routes/auth')
-const order = require('./routes/order')
-const hero = require('./routes/hero')
-const payment = require('./routes/payment')
-const category = require('./routes/category')
-const service = require('./routes/service')
-const subCategory = require('./routes/subCategory')
-const brand = require('./routes/brand')
-const banner = require('./routes/banner')
-const ad = require('./routes/ad')
-const poster = require('./routes/poster')
-const season = require('./routes/season')
-const subscribe = require('./routes/subscribe')
-const cart = require('./routes/cart')
-const dashboard = require('./routes/dashboard')
-const highlight = require('./routes/ProductHighlight')
-const seo = require('./routes/seo')
-const review = require('./routes/review')
-const gcc = require('./routes/gccCountry')
-const sitemap = require('./routes/sitemap')
-const blog = require('./routes/blog')
-const ip = require('./routes/ip')
-const contact = require('./routes/contact')
-const page = require('./routes/page')
+// Handle preflight requests
+app.options("*", cors());
 
-app.use('/api/v1/', products);
-app.use('/api/v1/', category);
-app.use('/api/v1/', subCategory);
-app.use('/api/v1/', brand);
-app.use('/api/v1/', hero);
-app.use('/api/v1/', service);
-app.use('/api/v1/', auth);
-app.use('/api/v1/', banner);
-app.use('/api/v1/', ad);
-app.use('/api/v1/', poster);
-app.use('/api/v1/', season);
-app.use('/api/v1/', subscribe);
-app.use('/api/v1/', cart);
-app.use('/api/v1/', order);
-app.use('/api/v1/', dashboard)
-app.use('/api/v1/', highlight)
-app.use('/api/v1/', seo)
-app.use('/api/v1/', review)
-app.use('/api/v1/', gcc)
-app.use('/api/v1/', blog)
-app.use('/api/v1/', ip);
-app.use('/api/v1/', contact);
-app.use('/api/v1/', page);
-app.use('/', sitemap);
-// app.use('/api/v1/',payment);
+// Body parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Cookies
+app.use(cookieParser());
+
+// Static files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.set("trust proxy", true);
+
+// Debug middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// Routes
+app.use("/api/v1/", require("./routes/product"));
+app.use("/api/v1/", require("./routes/category"));
+app.use("/api/v1/", require("./routes/subCategory"));
+app.use("/api/v1/", require("./routes/brand"));
+app.use("/api/v1/", require("./routes/hero"));
+app.use("/api/v1/", require("./routes/service"));
+app.use("/api/v1/", require("./routes/auth"));
+app.use("/api/v1/", require("./routes/banner"));
+app.use("/api/v1/", require("./routes/ad"));
+app.use("/api/v1/", require("./routes/poster"));
+app.use("/api/v1/", require("./routes/season"));
+app.use("/api/v1/", require("./routes/subscribe"));
+app.use("/api/v1/", require("./routes/cart"));
+app.use("/api/v1/", require("./routes/order"));
+app.use("/api/v1/", require("./routes/dashboard"));
+app.use("/api/v1/", require("./routes/ProductHighlight"));
+app.use("/api/v1/", require("./routes/seo"));
+app.use("/api/v1/", require("./routes/review"));
+app.use("/api/v1/", require("./routes/gccCountry"));
+app.use("/api/v1/", require("./routes/blog"));
+app.use("/api/v1/", require("./routes/ip"));
+app.use("/api/v1/", require("./routes/contact"));
+app.use("/api/v1/", require("./routes/page"));
+
+app.use("/", require("./routes/sitemap"));
 
 if (process.env.NODE_ENV === "production") {
-  const buildPath = path.join(__dirname, '../frontend/build');
+  const buildPath = path.join(__dirname, "../frontend/build");
+
   app.use(express.static(buildPath));
+
   app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.join(buildPath, 'index.html'));
+    res.sendFile(path.join(buildPath, "index.html"));
   });
 }
 
-
-app.use(errorMiddleware)
+// Error middleware MUST be last
+app.use(errorMiddleware);
 
 module.exports = app;
