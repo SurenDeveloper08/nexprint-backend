@@ -1,36 +1,38 @@
 const ErrorHandler = require("../utils/errorHandler");
 const User = require('../models/userModel')
 const catchAsyncError = require("./catchAsyncError");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-exports.isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
-    const authHeader = req.headers.authorization;
+exports.isAuthenticatedUser = async (
+    req,
+    res,
+    next
+) => {
+    const token = req.cookies.adminToken;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ success: false, message: 'Not authorized, no token' });
-    }
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
         return res.status(401).json({
             success: false,
-            message: 'Please login first.'
+            message: "Please login first",
         });
     }
-    const token = authHeader.split(' ')[1];
+
     try {
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        req.user = await User.findById(decoded.id);
 
-        req.user = await User.findById(decoded.id)
-           
-    } catch (error) {
+        next();
+    } catch (err) {
         return res.status(401).json({
             success: false,
-            message: 'Invalid or expired token. Please login again.'
+            message: "Session expired",
         });
     }
-    next();
-})
+};
 
 exports.authorizeRoles = (...roles) => {
     return (req, res, next) => {

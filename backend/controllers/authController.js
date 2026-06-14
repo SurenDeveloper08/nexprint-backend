@@ -1,9 +1,108 @@
 const catchAsyncError = require('../middlewares/catchAsyncError');
-const User = require('../models/userModel');
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
 const sendEmail = require('../utils/email');
 const ErrorHandler = require('../utils/errorHandler');
 const sendToken = require('../utils/jwt');
 const crypto = require('crypto')
+
+exports.login = async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid credentials",
+        });
+    }
+
+    const isMatched = await user.comparePassword(password);
+
+    if (!isMatched) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid credentials",
+        });
+    }
+
+    const token = jwt.sign(
+        {
+            id: user._id,
+            role: user.role,
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: "7d",
+        }
+    );
+
+    res.cookie("adminToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+        success: true,
+        user,
+    });
+};
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: "admin", // change to "user" if needed
+    });
+
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("adminToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.logout = async (req, res) => {
+    res.clearCookie("adminToken");
+
+    res.status(200).json({
+        success: true,
+        message: "Logout successful",
+    });
+};
 
 //register
 exports.registerUser = catchAsyncError(async (req, res, next) => {
@@ -141,7 +240,7 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
 
 //Get User Profile - /api/v1/myprofile
 exports.getUserProfile = catchAsyncError(async (req, res, next) => {
-    
+
     const user = await User.findById(req.user.id)
     res.status(200).json({
         success: true,
