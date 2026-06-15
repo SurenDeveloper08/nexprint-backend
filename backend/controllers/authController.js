@@ -104,6 +104,13 @@ exports.logout = async (req, res) => {
     });
 };
 
+exports.getMe = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+};
+
 //register
 exports.registerUser = catchAsyncError(async (req, res, next) => {
     const { name, email, password } = req.body

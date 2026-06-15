@@ -17,6 +17,7 @@ const {
     login,
     logout,
     register,
+    getMe,
     registerUser,
     loginUser,
     logoutUser,
@@ -36,7 +37,7 @@ const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/authenti
 router.route("/admin/register").post(register);
 router.route("/admin/login").post(login);
 router.route("/admin/logout").post(logout);
-router.route("/admin/me").get(isAuthenticatedUser);
+router.route("/admin/me").get(isAuthenticatedUser, getMe);
 
 router.route('/register').post(upload.single('avatar'), registerUser);
 router.route('/login').post(loginUser);
