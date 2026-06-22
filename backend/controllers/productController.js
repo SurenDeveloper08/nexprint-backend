@@ -578,6 +578,7 @@ exports.getSearchProducts = async (req, res) => {
             },
         })
             .select("name slug image")
+            .populate("brand", "name slug")
             .limit(8)
             .lean();
 
@@ -613,7 +614,7 @@ exports.getProductsByCategory = async (req, res) => {
         const products = await Product.find({
             category: category._id,
             isActive: true,
-        });
+        }).populate("brand", "name slug");
 
         res.status(200).json({
             success: true,
@@ -667,7 +668,7 @@ exports.getProductsBySubCategory =
                     subCategory:
                         subCategory._id,
                     isActive: true,
-                });
+                }).populate("brand", "name slug");
 
             res.status(200).json({
                 success: true,
@@ -715,7 +716,7 @@ exports.getProductsByBrand =
                 await Product.find({
                     brand: brand._id,
                     isActive: true,
-                });
+                }).populate("brand", "name slug");
 
             res.status(200).json({
                 success: true,
@@ -743,7 +744,7 @@ exports.getFeaturedProducts =
                     isActive: true,
                 }).sort({
                     createdAt: -1,
-                });
+                }).populate("brand", "name slug");
 
             res.status(200).json({
                 success: true,

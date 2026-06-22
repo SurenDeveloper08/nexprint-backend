@@ -1,13 +1,30 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const seoSchema = new mongoose.Schema({
-  page: { type: String, required: true, unique: true }, // e.g., 'home'
-  metaTitle: { type: String, required: true },
-  metaDescription: { type: String, required: true },
-  metaKeywords: { type: String },
-  canonicalUrl: { type: String }
-}, { timestamps: true });
+const seoSchema = new mongoose.Schema(
+  {
+    page: {
+      type: String,
+      required: true,
+      unique: true,
+    },
 
-module.exports = mongoose.model('Seo', seoSchema);
+    metaTitle: String,
+    metaDescription: String,
+    metaKeywords: String,
+    canonicalUrl: String,
 
+    ogTitle: String,
+    ogDescription: String,
+    ogImage: String,
 
+    status: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model("Seo", seoSchema);

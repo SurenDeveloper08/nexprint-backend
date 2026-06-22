@@ -1,45 +1,72 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const slugify = require("slugify");
 
-const seoSchema = new mongoose.Schema({
-  metaTitle: String,
-  metaDescription: String,
-  metaKeywords: String,
-  canonicalUrl: String,
-}, { _id: false });
-
-const blogSchema = new mongoose.Schema({
+const blogSchema = new mongoose.Schema(
+{
   title: {
     type: String,
     required: true,
-    trim: true
   },
+
   slug: {
     type: String,
-    required: true,
     unique: true,
-    lowercase: true,
-    trim: true
   },
-  description: {
+
+  shortDescription: {
     type: String,
-    required: true
+    required: true,
   },
+
+  content: {
+    type: String,
+    required: true,
+  },
+
   image: {
     type: String,
-    required: true
+    required: true,
   },
-  sortOrder: {
-    type: Number,
-    default: 0
-  },
-  status: {
+
+  imageAlt: {
     type: String,
-    enum: ['active', 'inactive'],
-    default: 'active'
+    default: "",
   },
-  seo: seoSchema
-}, {
-  timestamps: true
+
+  category: String,
+
+  metaTitle: String,
+  metaDescription: String,
+  metaKeywords: String,
+
+  status: {
+    type: Boolean,
+    default: true,
+  },
+
+  featured: {
+    type: Boolean,
+    default: false,
+  },
+
+  views: {
+    type: Number,
+    default: 0,
+  },
+},
+{
+  timestamps: true,
+}
+);
+
+blogSchema.pre("save", function (next) {
+  if (this.title) {
+    this.slug = slugify(this.title, {
+      lower: true,
+      strict: true,
+    });
+  }
+  next();
 });
 
-module.exports = mongoose.model('Blog', blogSchema);
+module.exports = mongoose.model("Blog", blogSchema);

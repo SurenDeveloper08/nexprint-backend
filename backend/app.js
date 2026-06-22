@@ -69,6 +69,8 @@ app.use("/api/v1/", require("./routes/gccCountry"));
 app.use("/api/v1/", require("./routes/blog"));
 app.use("/api/v1/", require("./routes/ip"));
 app.use("/api/v1/", require("./routes/contact"));
+app.use("/api/v1/", require("./routes/about"));
+app.use("/api/v1/", require("./routes/seo"));
 app.use("/api/v1/", require("./routes/page"));
 
 app.use("/", require("./routes/sitemap"));

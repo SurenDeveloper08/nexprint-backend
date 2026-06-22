@@ -4,12 +4,13 @@ const path = require('path')
 
 const {
   createBlog,
-  getBlog,
-  addBlog,
-  getAllBlogs,
-  getOneBlog,
   updateBlog,
-  deleteBlog
+  deleteBlog,
+  toggleBlogStatus,
+  getAllBlogsAdmin,
+  getSingleBlogAdmin,
+  getWebsiteBlogs,
+  getBlogBySlug,
 } = require('../controllers/blogController');
 const router = express.Router();
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/authenticate')
@@ -45,20 +46,34 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 //Web routes
-router.route('/blog').get(getAllBlogs)
-router.route('/blog/:slug').get(getOneBlog);
-//Admin routes
-router.route('/admin/blog/new').post(isAuthenticatedUser, authorizeRoles('admin'), upload.single('image'), addBlog);
-router.route('/admin/blog/:slug').put(isAuthenticatedUser, authorizeRoles('admin'), upload.single('image'), updateBlog);
-router.route('/admin/blog/:slug').get(isAuthenticatedUser, authorizeRoles('admin'), getOneBlog);
-router.route('/admin/blogs').get(isAuthenticatedUser, authorizeRoles('admin'), getAllBlogs);
-router.route('/admin/blog/:slug').delete(isAuthenticatedUser, authorizeRoles('admin'), deleteBlog);
+router.route('/blogs').get(getWebsiteBlogs)
+router.route('/blog/:slug').get(getBlogBySlug);
 
-router.route('/admin/blog/new').post(
-  // isAuthenticatedUser, authorizeRoles('admin'),
+//Admin routes
+router.route('/admin/blog').post(
+  // isAuthenticatedUser, authorizeRoles('admin'), 
   upload.single('image'), createBlog);
 
-router.route('/admin/blog/:slug').get(
+router.route('/admin/blog/:id').put(
   // isAuthenticatedUser, authorizeRoles('admin'), 
-  getBlog);
+  upload.single('image'), updateBlog);
+
+
+router.route('/admin/blog/status/:id').put(
+  // isAuthenticatedUser, authorizeRoles('admin'), 
+  upload.single('image'), toggleBlogStatus);
+
+router.route('/admin/blog/:id').get(
+  // isAuthenticatedUser, authorizeRoles('admin'), 
+  getSingleBlogAdmin);
+
+router.route('/admin/blogs').get(
+  // isAuthenticatedUser, authorizeRoles('admin'), 
+  getAllBlogsAdmin);
+
+router.route('/admin/blog/:id').delete(
+  // isAuthenticatedUser, authorizeRoles('admin'),
+  deleteBlog);
+
+
 module.exports = router;    
