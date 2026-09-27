@@ -28,7 +28,7 @@ exports.createCategory = catchAsyncError(async (req, res, next) => {
   console.log(existingCategory);
 
   if (existingCategory) {
-console.log('Category already exists');
+    console.log('Category already exists');
 
     return res.status(409).json({
       success: false,
@@ -478,7 +478,7 @@ exports.deleteCategory =
     }
   };
 
-  exports.getNavbarMenu = async (req, res) => {
+exports.getNavbarMenu = async (req, res) => {
   try {
     const [categories, subCategories, services] =
       await Promise.all([
@@ -497,20 +497,14 @@ exports.deleteCategory =
       ]);
 
     const menu = [
-      ...categories.map((category) => ({
-        name: category.name,
-        href: `/products/${category.slug}`,
-        submenu: subCategories
-          .filter(
-            (sub) =>
-              sub.category.toString() ===
-              category._id.toString()
-          )
-          .map((sub) => ({
-            name: sub.name,
-            href: `/products/${category.slug}/${sub.slug}`,
-          })),
-      })),
+      {
+        name: "Products",
+        href: "#",
+        submenu: categories.map((category) => ({
+          name: category.name,
+          href: `/products/${category.slug}`,
+        })),
+      },
 
       {
         name: "Services",
@@ -520,11 +514,6 @@ exports.deleteCategory =
           href: `/services/${service.slug}`,
         })),
       },
-
-      // {
-      //   name: "About Us",
-      //   href: "/about",
-      // },
 
       {
         name: "Contact",

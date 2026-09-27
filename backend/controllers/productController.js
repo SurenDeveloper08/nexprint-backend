@@ -531,6 +531,8 @@ exports.getSingleProduct =
 
 exports.getProductBySlug = async (req, res) => {
     try {
+        console.log('entered');
+        
         console.log(req.params);
 
         const product = await Product.findOne({
@@ -538,8 +540,7 @@ exports.getProductBySlug = async (req, res) => {
             isActive: true,
         })
             .populate("category", "name slug")
-            .populate("subCategory", "name slug")
-            .populate("brand", "name slug");
+           .populate("brand", "name slug");
 
         if (!product) {
             return res.status(404).json({
@@ -578,6 +579,7 @@ exports.getSearchProducts = async (req, res) => {
             },
         })
             .select("name slug image")
+             .populate("category", "name slug")
             .populate("brand", "name slug")
             .limit(8)
             .lean();
@@ -744,8 +746,8 @@ exports.getFeaturedProducts =
                     isActive: true,
                 }).sort({
                     createdAt: -1,
-                }).populate("brand", "name slug");
-
+                }).populate("brand", "name slug")
+                    .populate("category", "name slug");
             res.status(200).json({
                 success: true,
                 count: products.length,

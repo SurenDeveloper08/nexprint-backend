@@ -100,20 +100,22 @@ router.route("/products").get(
 router.route("/product/search").get(
   getSearchProducts
 );
+
+// =====================================
+// PRODUCT BY SLUG
+// =====================================
+console.log('ent');
+
+router.route("/product/slug/:slug").get(
+  getProductBySlug
+);
+
 // =====================================
 // SINGLE PRODUCT
 // =====================================
 
 router.route("/product/:id").get(
   getSingleProduct
-);
-
-// =====================================
-// PRODUCT BY SLUG
-// =====================================
-
-router.route("/product/slug/:slug").get(
-  getProductBySlug
 );
 
 // =====================================
